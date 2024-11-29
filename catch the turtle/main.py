@@ -1,72 +1,117 @@
 import turtle
 import random
 
-turtle_run = turtle.Turtle()
+
+# Ekran ayarları
 screen = turtle.Screen()
-screen.setup(width=600, height=600)
-#time_turtle = turtle.Turtle()
-#time_turtle.up()
-screen.title("catch turtle")
-screen.bgcolor("light blue")
+screen.setup(width=750, height=750)
+screen.title("Catch the Turtle Game")
 
-turtle_run.up()
+# Kaplumbağalar
+turtle_run = turtle.Turtle()
+time_turtle2 = turtle.Turtle()
 
-width = screen.window_width() // 2
-height = screen.window_height() // 2
 turtle_run.shape("turtle")
+time_turtle2.shape("turtle")
 
-turtle_run.goto(0, 250)
-score = 0
+time_turtle2.color("green")
+
+time_turtle2.speed(0)
+turtle_run.speed(0)
+
+turtle_run.penup()
+time_turtle2.penup()
+
+# Skor ve zaman göstergeleri
 score_display = turtle.Turtle()
 score_display.hideturtle()
 score_display.penup()
-score_display.goto(0, 260)  # Ekranın üst kısmına yerleştir
-score_display.write(f"Skor: {score}", align="center", font=("Arial", 24, "normal"))
+score_display.goto(0, 260)
+score = 0
+#score_display.write(f"Skor: {score}", align="center", font=("Arial", 24, "normal"))
 
+TimeTurtle = turtle.Turtle()
+TimeTurtle.hideturtle()
+TimeTurtle.penup()
+TimeTurtle.goto(0, 235)
+time = 20
+TimeTurtle.write(f"Time: {time}", align="center", font=("Arial", 24, "normal"))
 
-turtle_run.goto(0,0)
-def moveTarget() :
-    for i in range(60) :
-        turtle_run.forward(random.randint(0,75))
-        turtle_run.right(random.randint(0,360))
-        turtle_run.left(random.randint(0,360))
-time = 5
-time_turtle = turtle.Turtle()
-time_turtle.hideturtle()
-time_turtle.penup()
-time_turtle.goto(0, 230)
+# Sınır ayarları
+BOUNDARY = 300
+
+# Sınır kontrol fonksiyonu
+def check_boundary(turtle_instance):
+    x, y = turtle_instance.xcor(), turtle_instance.ycor()
+    if x < -BOUNDARY:
+        turtle_instance.setx(-BOUNDARY)
+    elif x > BOUNDARY:
+        turtle_instance.setx(BOUNDARY)
+    if y < -BOUNDARY:
+        turtle_instance.sety(-BOUNDARY)
+    elif y > BOUNDARY:
+        turtle_instance.sety(BOUNDARY)
+
+# Kaplumbağa hareketleri
+def moveTarget():
+    turtle_run.forward(random.randint(20, 50))
+    turtle_run.setheading(random.randint(0, 360))
+    check_boundary(turtle_run)
+    screen.ontimer(moveTarget, 200)  # 0.2 saniyede bir tekrar
+
+def timeTarget():
+    time_turtle2.forward(random.randint(20, 50))
+    time_turtle2.setheading(random.randint(0, 360))
+    check_boundary(time_turtle2)
+    screen.ontimer(timeTarget, 200)  # 0.2 saniyede bir tekrar
+
+# Zamanlayıcı
 
 
 def countdown():
     global time
-    time_turtle.clear()
+    global score
+    TimeTurtle.clear()
     if time > 0:
-        time_turtle.write(f"Time: {time}", align="center", font=("Arial", 24, "normal"))
         time -= 1
-        screen.ontimer(countdown, 1000)  # 1 saniye sonra tekrar çağır
+        score_display.write(f"Skor: {score}", align="center", font=("Arial", 24, "normal"))
+        TimeTurtle.write(f"Time: {time}", align="center", font=("Arial", 24, "normal"))
+
+        screen.ontimer(countdown, 1000)
     else:
-        time_turtle.write("Time's up!", align="center", font=("Arial", 24, "normal"))
-        while True :
-            turtle_run.home()
+        time = 20
+        score =0
+        score_display.clear()
+        TimeTurtle.clear()
+        countdown()
 
 
-countdown()
-time_turtle.write(f"time: {time}", align ="center", font = ("arial",24,"normal"))
+# Tıklama olayları
 def check_hit(x, y):
     global score
-
     if turtle_run.distance(x, y) < 20:
-
         score += 1
         score_display.clear()
         score_display.write(f"Skor: {score}", align="center", font=("Arial", 24, "normal"))
-        moveTarget()
-        turtle_run.onclick()
+        turtle_run.goto(random.randint(-BOUNDARY, BOUNDARY), random.randint(-BOUNDARY, BOUNDARY))
 
+def check_hit2(x, y):
+    global time
+    if time_turtle2.distance(x, y) < 20:
+        time += 5
+        time = time - 2
+        TimeTurtle.clear()
+        TimeTurtle.write(f"Time: {time}", align="center", font=("Arial", 24, "normal"))
+        time_turtle2.goto(random.randint(-BOUNDARY, BOUNDARY), random.randint(-BOUNDARY, BOUNDARY))
+
+# Tıklama işlevlerini kaplumbağalara bağlama
 turtle_run.onclick(check_hit)
+time_turtle2.onclick(check_hit2)
+
 moveTarget()
-check_hit(0,19)
+timeTarget()
+countdown()
+
+screen.mainloop()
+
 turtle.done()
-
-
-
